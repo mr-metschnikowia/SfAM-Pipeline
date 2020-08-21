@@ -34,10 +34,15 @@ def make_blast_db():
 def batch_blastn():
     proc = subprocess.Popen('cmd.exe', stdin=subprocess.PIPE)
     # facilitates command line interaction
-    proc.stdin.write(b'blastn -query C:\Users\Rhino\\blast+\q_stage2\\batch.txt -db custom_db -out C:\Users\Rhino\\blast+\Outputs\output.txt -outfmt "6 qacc sacc pident qcovs sstart send"\n')
+    proc.stdin.write(b'blastn -query C:\Users\Rhino\\blast+\q_stage2\\batch.txt -db custom_db -out C:\Users\Rhino\\blast+\Outputs\output.txt -outfmt "10 qacc sacc pident qcovs sstart send"\n')
     proc.stdin.close()
     proc.wait()
     # runs blast+ (blastn): batch query is blasted against custom database > output.txt file is pooped out
+    with open(r'C:\Users\Rhino\\blast+\Outputs\output.txt','r') as f:
+        lines = f.readlines()
+        lines.insert(0,'qacc,sacc,pident,qcovs,sstart,send\n')
+    with open(r'C:\Users\Rhino\\blast+\Outputs\output.txt', 'w') as f:
+        f.writelines(lines)
 
 if __name__ == '__main__':
     pre_db()
