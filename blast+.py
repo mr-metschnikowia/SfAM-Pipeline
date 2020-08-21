@@ -40,9 +40,10 @@ def batch_blastn():
     # runs blast+ (blastn): batch query is blasted against custom database > output.txt file is pooped out
     with open(r'C:\Users\Rhino\\blast+\Outputs\output.txt','r') as f:
         lines = f.readlines()
-        lines.insert(0,'qacc,sacc,pident,qcovs,sstart,send\n')
+    lines.insert(0,'qacc,sacc,pident,qcovs,sstart,send\n')
     with open(r'C:\Users\Rhino\\blast+\Outputs\output.txt', 'w') as f:
         f.writelines(lines)
+    # title line is inserted
 
 if __name__ == '__main__':
     pre_db()
