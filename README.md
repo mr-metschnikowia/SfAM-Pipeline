@@ -4,7 +4,7 @@ User Input:
 2. .fasta files containing subject genomes
 3. File path adjustments
 4. Predicted clusters (based on histogram)
-5. File containing accessions-taxid and another (for own reference) containing strain-taxid information
+5. File containing accessions-taxid and another (for own reference) containing strain-taxid information - This is done manually atm but I hope to automate it at some point
 
 Automation:
 1. .fasta files containing query sequences are concatenated to form batch query
