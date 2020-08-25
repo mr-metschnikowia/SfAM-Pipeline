@@ -26,7 +26,7 @@ def make_blast_db():
     proc = subprocess.Popen('cmd.exe', stdin=subprocess.PIPE)
     # facilitates command line interaction
     proc.stdin.write(b'cd C:\Users\Rhino\\blast+\n')
-    proc.stdin.write(b'makeblastdb -in C:\Users\Rhino\\blast+\db_stage2\custom.txt -dbtype nucl -parse_seqids -out C:\Users\Rhino\\blast+\\blastdb\custom_db\n')
+    proc.stdin.write(b'makeblastdb -in C:\Users\Rhino\\blast+\db_stage2\custom.txt -dbtype nucl -parse_seqids -out C:\Users\Rhino\\blast+\\blastdb\custom_db -taxid_map C:\Users\Rhino\\blast+\\tax_map\\tax_map1.txt\n')
     proc.stdin.close()
     proc.wait()
     # Local BLASTable database is created from pre database
@@ -34,13 +34,13 @@ def make_blast_db():
 def batch_blastn():
     proc = subprocess.Popen('cmd.exe', stdin=subprocess.PIPE)
     # facilitates command line interaction
-    proc.stdin.write(b'blastn -query C:\Users\Rhino\\blast+\q_stage2\\batch.txt -db custom_db -out C:\Users\Rhino\\blast+\Outputs\output.txt -outfmt "10 qacc sacc pident qcovs sstart send"\n')
+    proc.stdin.write(b'blastn -query C:\Users\Rhino\\blast+\q_stage2\\batch.txt -db custom_db -out C:\Users\Rhino\\blast+\Outputs\output.txt -outfmt "10 qacc staxid sacc pident qcovs sstart send"\n')
     proc.stdin.close()
     proc.wait()
     # runs blast+ (blastn): batch query is blasted against custom database > output.txt file is pooped out
     with open(r'C:\Users\Rhino\\blast+\Outputs\output.txt','r') as f:
         lines = f.readlines()
-    lines.insert(0,'qacc,sacc,pident,qcovs,sstart,send\n')
+    lines.insert(0,'qacc,staxid,sacc,pident,qcovs,sstart,send\n')
     with open(r'C:\Users\Rhino\\blast+\Outputs\output.txt', 'w') as f:
         f.writelines(lines)
     # title line is inserted
