@@ -1,5 +1,8 @@
 import os
 import subprocess
+import pandas as pd
+from sklearn.cluster import KMeans
+from matplotlib import pyplot as plt
 # importing prereqs
 
 def pre_db():
@@ -45,9 +48,47 @@ def batch_blastn():
         f.writelines(lines)
     # title line is inserted
 
+def dataframe():
+    global df
+    df = pd.read_csv(r'C:\Users\Rhino\blast+\Outputs\output.txt')
+    df = df.sort_values(by=['qcovs'])
+    # blast+ output is read into pandas dataframe
+    # dataframe is ordered based on qcovs
+
+def hist_me_up():
+    df.hist(column = 'qcovs')
+    plt.ylabel('frequency'), plt.xlabel('query coverage'), plt.title('Distribution of query coverage')
+    plt.savefig(r'C:\Users\Rhino\PycharmProjects\sfam\Figures\\histogram.png')
+    # histogram of qcovs is created
+    # histogram is stored as figure1 in figures folder
+
+def clusterize():
+    column = df.qcovs
+    array = column.values
+    prediction = int(input('Please predict number of clusters:'))
+    compatible = array.reshape(-1,1)
+    km = KMeans(n_clusters=prediction,random_state=0).fit(compatible)
+    labels = km.labels_
+    labels = [str(i) for i in labels]
+    df['clusters'] = labels
+    # 1D array created from dataframe column of interest
+    # 2D array created for compatibility
+    # k-means cluster analysis is performed on 2D array
+    # cluster data is added to dataframe
+
+def R_script():
+    df.to_csv(r'C:\Users\Rhino\PycharmProjects\sfam\pandas_dfs\df1.csv')
+    # dataframe exported as .csv file
+    rscript = subprocess.call(['C:/Users/Rhino/Documents/R/R-3.6.2/bin/Rscript.exe', '--vanilla', 'C:/Users/Rhino/PycharmProjects/sfam/R_Scripts/Script1.R'], shell=True)
+    # R script 'Script1.R' is run
+
 if __name__ == '__main__':
     pre_db()
     batch_q()
     make_blast_db()
     batch_blastn()
+    dataframe()
+    hist_me_up()
+    clusterize()
+    R_script()
     # calling functions
