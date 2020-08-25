@@ -5,9 +5,6 @@ User Input:
 3. File path adjustments
 4. Predicted clusters (based on histogram)
 
-Prerequisites:
-1. Relies on R script: https://github.com/mr-metschnikowia/Pipeline-Mod3
-
 Automation:
 1. .fasta files containing query sequences are concatenated to form batch query
 2. Custom blastable database created from .fasta files containing subject genomes
