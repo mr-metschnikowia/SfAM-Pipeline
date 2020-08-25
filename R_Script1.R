@@ -35,5 +35,5 @@ bar <- bar + scale_fill_discrete(name="Strain\nIndex")
 bar <- bar + xlab("Cluster") + ylab("Accession Count")
 bar
 dev.off()
-# barchart is created (in .png file) to visualise data
+# barchart is created (in .png file) for data visualisation
 
