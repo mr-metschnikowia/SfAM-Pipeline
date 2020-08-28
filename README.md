@@ -1,10 +1,13 @@
 # SfAM-Pipeline
+Pipeline optimised to run on Test VM hosted on CLIMB.
+
 User Input: 
-1. .fasta files containing query sequences
-2. .fasta files containing subject genomes
-3. File path adjustments
+1. .fasta files containing query sequences (/home/centos/project/genes)
+2. .fasta files containing subject genomes (/home/centos/project/genomes)
+3. Taxonomic map (accession-organismID)(/home/centos/blast+/tax_map/tax_map1.txt)
 4. Predicted clusters (based on histogram)
-5. File containing accessions-taxid and another (for own reference) containing strain-taxid information - This is done manually atm but I hope to automate it at some point
+
+IMPORTANT: At the moment, for some reason, file data is not overwritten but added to, therefore it is necessary to either delete all existing output files or change names of files before each run
 
 Automation:
 1. .fasta files containing query sequences are concatenated to form batch query
@@ -18,3 +21,6 @@ Automation:
 9. Boxplot of qcovs distribution for each strain plotted (output: .png file)
 10. New metric: Number of unique accessions counted for each cluster aggregated on strain id
 11. Multivariable bar chart created from data (output: .png file)
+
+All figures stored in - /home/centos/project/outputs
+blast+ output - /home/centos/blast+/outputs
