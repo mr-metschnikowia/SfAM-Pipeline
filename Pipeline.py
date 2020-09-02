@@ -115,7 +115,7 @@ if __name__ == '__main__':
     batch_blastn()
     dataframe()
     hist_me_up()
-    DNDS()
     clusterize()
+    DNDS()
     R_script()
     # calling functions
