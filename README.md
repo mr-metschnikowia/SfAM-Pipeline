@@ -16,11 +16,14 @@ Automation:
 4. Ouput is converted to pandas dataframe 
 5. Histogram of qcovs is plotted to show distribution (ouput: .png file)
 6. Hits are clustered based on qcovs using kmeans
-7. Updated dataframe is exported as .csv file and relevant columns are read into R script
-8. Kruskal-Wallis test conducted on qcovs aggregated by Strain (output: .txt file)
-9. Boxplot of qcovs distribution for each strain plotted (output: .png file)
-10. New metric: Number of unique accessions counted for each cluster aggregated on strain id
-11. Multivariable bar chart created from data (output: .png file)
+7. dn/ds is calculated for each hit relative to APC1.2
+8. Updated dataframe is exported as .csv file and relevant columns are read into R script
+9. Kruskal-Wallis test conducted on qcovs aggregated by Strain (output: .txt file)
+10. Boxplot of qcovs distribution for each strain plotted (output: .png file)
+11. New metric: Number of unique accessions counted for each cluster aggregated on strain id
+12. Multivariable bar chart created from data (output: .png file)
+13. Histogram of dn/ds is plotted
+14. Multivariate barchart plotted reflecting dn/ds per gene per strain 
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
