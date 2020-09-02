@@ -21,7 +21,7 @@ title(main='Box and whisker plot of query coverage across yeast strains', col='b
 dev.off()
 # boxplot is created (in .png file) to visualise data
 
-df2 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,4,12))
+df2 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,4,11))
 # importing relevant columns from .csv table of blast output
 df3 <- ddply(df2,~staxid+clusters,summarise,accession_count=length(unique(sacc)))
 df3$staxid <- as.factor(df3$staxid)
@@ -38,7 +38,7 @@ bar
 dev.off()
 # barchart is created (in .png file) to visualise data
 
-df4 <- fread('/home/centos/project/dfs/df1.csv',select=c(2,3,11))
+df4 <- fread('/home/centos/project/dfs/df1.csv',select=c(2,3,12))
 png('/home/centos/project/outputs/hist2.png')
 hist(df4$`dnds`,xlab='dn/ds',main='Distribution of dn/ds')
 dev.off()
