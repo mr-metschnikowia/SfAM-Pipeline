@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
+from dnds import dnds
 # importing prereqs
 
 def pre_db():
@@ -30,11 +31,11 @@ def make_blast_db():
 
 def batch_blastn():
     os.system("export BLASTDB='/home/centos/blast+/dbs'")
-    os.system('blastn -query /home/centos/project/genes/batch.txt -db custom_db -out /home/centos/blast+/outputs/output.txt -outfmt "10 qacc staxid sacc pident qcovs sstart send"')
+    os.system('blastn -query /home/centos/project/genes/batch.txt -db custom_db -out /home/centos/blast+/outputs/output.txt -outfmt "10 qacc staxid sacc pident qcovs sstart send qseq sseq"')
     # runs blast+ (blastn): batch query is blasted against custom database > output.txt file is pooped out
     with open(r'/home/centos/blast+/outputs/output.txt','r') as f:
         lines = f.readlines()
-    lines.insert(0,'qacc,staxid,sacc,pident,qcovs,sstart,send\n')
+    lines.insert(0,'qacc,staxid,sacc,pident,qcovs,sstart,send,qseq,sseq\n')
     with open(r'/home/centos/blast+/outputs/output.txt', 'w') as f:
         f.writelines(lines)
     # title line is inserted
@@ -42,9 +43,7 @@ def batch_blastn():
 def dataframe():
     global df
     df = pd.read_csv(r'/home/centos/blast+/outputs/output.txt')
-    df = df.sort_values(by=['qcovs'])
     # blast+ output is read into pandas dataframe
-    # dataframe is ordered based on qcovs
 
 def hist_me_up():
     df.hist(column = 'qcovs')
@@ -67,9 +66,45 @@ def clusterize():
     # k-means cluster analysis is performed on 2D array
     # cluster data is added to dataframe
 
+def DNDS():
+    column = []
+    for i in range(len(df.qseq)):
+        codons = ['-', 'K', 'M', 'B', 'V', 'S', 'W', 'D', 'Y', 'R', 'H']
+        for codon in codons:
+            while df.qseq[i].find(codon) > -1:
+                df.sseq[i] = df.sseq[i][0: df.qseq[i].find(codon)] + df.sseq[i][df.qseq[i].find(codon) + 1:]
+                df.qseq[i] = df.qseq[i][0: df.qseq[i].find(codon)] + df.qseq[i][df.qseq[i].find(codon) + 1:]
+            while df.sseq[i].find(codon) > -1:
+                df.qseq[i] = df.qseq[i][0: df.sseq[i].find(codon)] + df.qseq[i][df.sseq[i].find(codon) + 1:]
+                df.sseq[i] = df.sseq[i][0: df.sseq[i].find(codon)] + df.sseq[i][df.sseq[i].find(codon) + 1:]
+        # removing gaps
+        while len(df.qseq[i]) % 3 > 0:
+            df.qseq[i] = df.qseq[i][:-1]
+            df.sseq[i] = df.sseq[i][:-1]
+        # trimming sequences that are not multiples of 3
+        seq_1 = df.qseq[i]
+        seq_2 = df.sseq[i]
+        try:
+            x = round(dnds(seq_1, seq_2), 3)
+        except ZeroDivisionError:
+            x = 0
+        column.append(x)
+        # dnds calculated for each hit relative to APC1.2
+    df['dnds'] = column
+    # dnds column added to dataframe
+    # x = 0
+    # # y = 3
+    # # seq = 'AAABBBCCCDD-'
+    # # for i in range(int(len(seq)/3)):
+    # #     if seq[x:y].find('-') > -1:
+    # #         seq = seq[0:x] + seq[y:]
+    # #     x = y
+    # #     y = x + 3
+    # # # alternative method for omitting unwanted codons, taking triplets into account
+
 def R_script():
     df.to_csv(r'/home/centos/project/dfs/df1.csv')
-    # dataframe exported as .csv file
+    # dataframe is exported as .csv
     os.system('/usr/bin/Rscript /home/centos/project/code/Script1.R')
     # R script 'Script1.R' is run
 
@@ -80,6 +115,7 @@ if __name__ == '__main__':
     batch_blastn()
     dataframe()
     hist_me_up()
+    DNDS()
     clusterize()
     R_script()
     # calling functions
