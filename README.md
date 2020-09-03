@@ -24,6 +24,9 @@ Automation:
 12. Multivariable bar chart created from data (output: .png file)
 13. Histogram of dn/ds is plotted
 14. Multivariate barchart plotted reflecting dn/ds per gene per strain 
+15. Number of chromosomes over which homolgs are distributed calculated for each strain
+16. Total amount of intergenic space between homologs on same accession in each strain calculated
+17. Hybrid(line/bar) created reflecting distribution of intergenic space between strains and accessions
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
