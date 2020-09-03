@@ -102,6 +102,36 @@ def DNDS():
     # #     y = x + 3
     # # # alternative method for omitting unwanted codons, taking triplets into account
 
+def intergenic_space_count():
+    global df
+    df.sort_values(['staxid', 'sacc', 'sstart'], inplace=True)
+    df = df.reset_index(drop=True)
+    # data ordered by staxid, sacc and sstart
+    total_intergenic_space = []
+    for i in range(len(df.staxid)):
+        if df.sstart[i] > df.send[i]:
+            x = df.sstart[i]
+            y = df.send[i]
+            df.sstart[i] = y
+            df.send[i] = x
+    # sstart and ssend are flipped if ssend < sstart for standardisation purposes
+    for i in range(len(df.staxid) - 1):
+        staxid = df.staxid[i]
+        sacc = df.sacc[i]
+        if staxid == df.staxid[i + 1]:
+            if sacc == df.sacc[i + 1]:
+                intergenic_space = df.sstart[i + 1] - df.send[i]
+                total_intergenic_space.append(intergenic_space)
+            else:
+                intergenic_space = 0
+                total_intergenic_space.append(intergenic_space)
+        else:
+            intergenic_space = 0
+            total_intergenic_space.append(intergenic_space)
+    total_intergenic_space.append(0)
+    df['intergenic_space'] = total_intergenic_space
+    # intergenic space between each gene on same chromosme/contig in same strain is calculated
+
 def R_script():
     df.to_csv(r'/home/centos/project/dfs/df1.csv')
     # dataframe is exported as .csv
@@ -117,5 +147,6 @@ if __name__ == '__main__':
     hist_me_up()
     clusterize()
     DNDS()
+    intergenic_space_count()
     R_script()
     # calling functions
