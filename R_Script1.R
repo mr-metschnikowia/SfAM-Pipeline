@@ -41,13 +41,33 @@ dev.off()
 df4 <- fread('/home/centos/project/dfs/df1.csv',select=c(2,3,12))
 png('/home/centos/project/outputs/hist2.png')
 hist(df4$`dnds`,xlab='dn/ds',main='Distribution of dn/ds')
+# histogram of dn/ds plotted
 dev.off()
 png('/home/centos/project/outputs/barchart2.png')
 no_colours = length(unique(df4$qacc))
 myColors <- brewer.pal(no_colours, "Set3")
 bar2 <- ggplot(df4, aes(x=staxid, y=dnds, fill=qacc)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
-bar2 <- bar2 + ggtitle("Distribution of dn/ds across strains and across homologs") + theme(plot.title=element_text(face="bold"))
+bar2 <- bar2 + ggtitle("Distribution of dn/ds across strains and across genes") + theme(plot.title=element_text(face="bold"))
 bar2 <- bar2 + scale_fill_discrete(name="Gene")
 bar2 <- bar2 + xlab("Strain") + ylab("dn/ds")
 bar2
 dev.off()
+# multivariate bar chart of dn/ds by strain and genes
+
+df5 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,13))
+df5 <- aggregate(df5$intergenic_space, by=list(staxid=df5$staxid), FUN=sum)
+df5 <- rename(df5, c("x"="intergenic_space"))
+df6 <- ddply(df2,~staxid,summarise,accession_count=length(unique(sacc)))
+JoinedDT <- merge(df5,df6)
+JoinedDT$staxid <- as.factor(JoinedDT$staxid)
+png('/home/centos/project/outputs/barchart3.png')
+scale <- max(JoinedDT$intergenic_space)/max(JoinedDT$accession_count)
+hybrid <- ggplot(JoinedDT) + 
+  geom_col(aes(x = staxid, y = intergenic_space), size = 1, color = "darkblue", fill = "white") +
+  geom_line(aes(x = staxid, y = scale*accession_count), size = 1.5, color="red", group = 1) + 
+  scale_y_continuous(sec.axis = sec_axis(~./scale, name = "Accession Count"))
+hybrid <- hybrid + ggtitle("Distribution of intergenic space across strains and accessions") + theme(plot.title=element_text(face="bold"))
+hybrid <- hybrid + xlab("Strain") + ylab("Intergenic Space")
+hybrid
+dev.off()
+# hybrid (bar/line) of intergenic space by strain and number of accessions
