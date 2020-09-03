@@ -60,7 +60,7 @@ df5 <- rename(df5, c("x"="intergenic_space"))
 df6 <- ddply(df2,~staxid,summarise,accession_count=length(unique(sacc)))
 JoinedDT <- merge(df5,df6)
 JoinedDT$staxid <- as.factor(JoinedDT$staxid)
-png('/home/centos/project/outputs/barchart3.png')
+png('/home/centos/project/outputs/hybrid.png')
 scale <- max(JoinedDT$intergenic_space)/max(JoinedDT$accession_count)
 hybrid <- ggplot(JoinedDT) + 
   geom_col(aes(x = staxid, y = intergenic_space), size = 1, color = "darkblue", fill = "white") +
