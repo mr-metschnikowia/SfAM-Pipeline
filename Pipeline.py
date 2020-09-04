@@ -132,6 +132,25 @@ def intergenic_space_count():
     df['intergenic_space'] = total_intergenic_space
     # intergenic space between each gene on same chromosme/contig in same strain is calculated
 
+def extract_intergenic_seqs():
+    with open(r'/home/centos/project/genomes/custom.txt', 'r') as f:
+        data = f.read()
+    column = []
+    for i in range(len(df.sacc)):
+        if df.intergenic_space[i] > 0:
+            data.find(df.sacc[i])
+            chunk1 = data[data.find(df.sacc[i]):]
+            chunk2 = chunk1[chunk1.find('\n'):]
+            start = df.send[i] + 1
+            end = df.sstart[i + 1]
+            inter_seq = chunk2[start:end]
+            column.append(inter_seq)
+        else:
+            inter_seq = 'N/A'
+            column.append(inter_seq)
+    df['inter_seqs'] = column
+    # intergenic sequences are extracted and added to dataframe
+
 def R_script():
     df.to_csv(r'/home/centos/project/dfs/df1.csv')
     # dataframe is exported as .csv
@@ -148,5 +167,6 @@ if __name__ == '__main__':
     clusterize()
     DNDS()
     intergenic_space_count()
+    extract_intergenic_seqs()
     R_script()
     # calling functions
