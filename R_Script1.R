@@ -43,13 +43,15 @@ png('/home/centos/project/outputs/hist2.png')
 hist(df4$`dnds`,xlab='dn/ds',main='Distribution of dn/ds')
 # histogram of dn/ds plotted
 dev.off()
+df7 <- aggregate(df4$dnds, by=list(staxid=df4$staxid, qacc=df4$qacc), FUN=mean)
+df7 <- rename(df7, c("x"="mean_dnds"))
 png('/home/centos/project/outputs/barchart2.png')
-no_colours = length(unique(df4$qacc))
-myColors <- brewer.pal(no_colours, "Set3")
-bar2 <- ggplot(df4, aes(x=staxid, y=dnds, fill=qacc)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
-bar2 <- bar2 + ggtitle("Distribution of dn/ds across strains and across genes") + theme(plot.title=element_text(face="bold"))
+no_colours = length(unique(df7$qacc))
+myColors <- brewer.pal(no_colours, "Set1")
+bar2 <- ggplot(df7, aes(x=staxid, y=mean_dnds, fill=qacc)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
+bar2 <- bar2 + ggtitle("Distrbituion of mean dn/ds across genes and across strains") + theme(plot.title=element_text(face="bold"))
 bar2 <- bar2 + scale_fill_discrete(name="Gene")
-bar2 <- bar2 + xlab("Strain") + ylab("dn/ds")
+bar2 <- bar2 + xlab("Strain") + ylab("mean dn/ds")
 bar2
 dev.off()
 # multivariate bar chart of dn/ds by strain and genes
@@ -67,7 +69,7 @@ hybrid <- ggplot(JoinedDT) +
   geom_line(aes(x = staxid, y = scale*accession_count), size = 1.5, color="red", group = 1) + 
   scale_y_continuous(sec.axis = sec_axis(~./scale, name = "Accession Count"))
 hybrid <- hybrid + ggtitle("Distribution of intergenic space across strains and accessions") + theme(plot.title=element_text(face="bold"))
-hybrid <- hybrid + xlab("Strain") + ylab("Intergenic Space")
+hybrid <- hybrid + xlab("Strain") + ylab("Total Intergenic Space")
 hybrid
 dev.off()
 # hybrid (bar/line) of intergenic space by strain and number of accessions
