@@ -27,6 +27,7 @@ Automation:
 15. Number of chromosomes over which homolgs are distributed calculated for each strain
 16. Total amount of intergenic space between homologs on same accession in each strain calculated
 17. Hybrid(line/bar) created reflecting distribution of intergenic space between strains and accessions
+18. All intergenic sequences are extracted
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
