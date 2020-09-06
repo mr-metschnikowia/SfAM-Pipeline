@@ -29,6 +29,9 @@ Automation:
 16. Total amount of intergenic space between homologs on same accession in each strain calculated
 17. Hybrid(line/bar) created reflecting distribution of intergenic space between strains and accessions
 18. All intergenic sequences are extracted
+19. blastn search is conducted with intergenic sequences from APC1.2 as the query and intergenic sequences from other strains as subjects
+20. Histogram of query coverage plotted for intergenic sequences
+21. Bar chart plotted showing mean query coverage for intergenic sequences across strains
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
