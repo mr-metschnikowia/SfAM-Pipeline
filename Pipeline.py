@@ -25,32 +25,39 @@ def batch_q():
         f.write(master_string_2)
     # creates batch query file from gene FASTA files
 
-def make_blast_db():
-    os.system('makeblastdb -in /home/centos/project/genomes/custom.txt -dbtype nucl -parse_seqids -out /home/centos/blast+/dbs/custom_db -taxid_map /home/centos/blast+/tax_maps/tax_map1.txt')
+def make_blast_db(input,output,tax_map):
+    os.system('makeblastdb -in /home/centos/project/genomes/{} -dbtype nucl -parse_seqids -out /home/centos/blast+/dbs/{} -taxid_map /home/centos/blast+/tax_maps/{}'.format(input,output,tax_map))
     # interacts with command line - blastable database created from 'pre-database'
 
-def batch_blastn():
+def batch_blastn(query,db,output):
     os.system("export BLASTDB='/home/centos/blast+/dbs'")
-    os.system('blastn -query /home/centos/project/genes/batch.txt -db custom_db -out /home/centos/blast+/outputs/output.txt -outfmt "10 qacc staxid sacc pident qcovs sstart send qseq sseq"')
+    os.system('blastn -query /home/centos/project/genes/{} -db {} -out /home/centos/blast+/outputs/{} -outfmt "10 qacc staxid sacc pident qcovs sstart send qseq sseq"'.format(query,db,output))
     # runs blast+ (blastn): batch query is blasted against custom database > output.txt file is pooped out
-    with open(r'/home/centos/blast+/outputs/output.txt','r') as f:
+    with open(r'/home/centos/blast+/outputs/{}'.format(output),'r') as f:
         lines = f.readlines()
     lines.insert(0,'qacc,staxid,sacc,pident,qcovs,sstart,send,qseq,sseq\n')
-    with open(r'/home/centos/blast+/outputs/output.txt', 'w') as f:
+    with open(r'/home/centos/blast+/outputs/{}'.format(output), 'w') as f:
         f.writelines(lines)
     # title line is inserted
 
-def dataframe():
+def dataframe(path):
     global df
-    df = pd.read_csv(r'/home/centos/blast+/outputs/output.txt')
+    df = pd.read_csv(path)
     # blast+ output is read into pandas dataframe
 
-def hist_me_up():
-    df.hist(column = 'qcovs')
-    plt.ylabel('frequency'), plt.xlabel('query coverage'), plt.title('Distribution of query coverage')
-    plt.savefig(r'/home/centos/project/outputs/histogram.png')
+def hist_me_up(output):
+    global empty_df
+    empty_df = False
+    try:
+        df.hist(column='qcovs')
+        plt.ylabel('frequency'), plt.xlabel('query coverage'), plt.title('Distribution of query coverage')
+        plt.savefig(output)
+    except ValueError:
+        empty_df = True
+        print('There is no data in this frame de data')
     # histogram of qcovs is created
-    # histogram is stored as figure1 in figures folder
+    # histogram in figures folder
+    # empty data frame is accomodated for
 
 def clusterize():
     column = df.qcovs
@@ -151,22 +158,70 @@ def extract_intergenic_seqs():
     df['inter_seqs'] = column
     # intergenic sequences are extracted and added to dataframe
 
-def R_script():
-    df.to_csv(r'/home/centos/project/dfs/df1.csv')
-    # dataframe is exported as .csv
-    os.system('/usr/bin/Rscript /home/centos/project/code/Script1.R')
-    # R script 'Script1.R' is run
+def batch_from_string():
+    with open(r'/home/centos/project/genes/batch2.txt', 'w') as f:
+        count = 1
+        tax_codes = []
+        for i in range(len(df.sacc)):
+            if df.sacc[i] == 'CP034458' and type(df.inter_seqs[i]) == str:
+                new_acc = '{}.{}'.format(df.sacc[i],count)
+                tax_codes.append(new_acc + ' 1\n')
+                f.write('>{}\n'.format(new_acc))
+                f.write(df.inter_seqs[i])
+                f.write('\n')
+                count +=1
+        with open(r'/home/centos/blast+/tax_maps/tax_map2.txt','w') as f:
+            f.writelines(tax_codes)
+
+def database_from_string():
+    with open(r'/home/centos/project/genomes/custom2.txt', 'w') as f:
+        scanned = []
+        count = 1
+        staxid = 1
+        tax_codes = []
+        for i in range(len(df.sacc)):
+            if df.sacc[i] == 'CP034458':
+                continue
+            elif type(df.inter_seqs[i]) == str:
+                if df.sacc[i] in scanned:
+                    count += 1
+                else:
+                    count = 1
+                    staxid += 1
+                new_acc = '{}.{}'.format(df.sacc[i], count)
+                tax_codes.append(new_acc + ' {}\n'.format(staxid))
+                f.write('>{}\n'.format(new_acc))
+                f.write(df.inter_seqs[i])
+                f.write('\n')
+                scanned.append(df.sacc[i])
+        with open(r'/home/centos/blast+/tax_maps/tax_map2.txt','a') as f:
+            f.writelines(tax_codes)
+
+def R_script(script):
+    os.system('/usr/bin/Rscript' + ' {}'.format(script))
+    # R script is run
 
 if __name__ == '__main__':
     pre_db()
     batch_q()
-    make_blast_db()
-    batch_blastn()
-    dataframe()
-    hist_me_up()
+    make_blast_db('custom.txt','custom_db','tax_map1.txt')
+    batch_blastn('batch.txt','custom_db','output.txt')
+    dataframe(r'/home/centos/blast+/outputs/output.txt')
+    hist_me_up(r'/home/centos/project/outputs/histogram.png')
     clusterize()
     DNDS()
     intergenic_space_count()
     extract_intergenic_seqs()
-    R_script()
+    df.to_csv(r'/home/centos/project/dfs/df1.csv')
+    R_script('/home/centos/project/code/Script1.R')
+    batch_from_string()
+    database_from_string()
+    make_blast_db('custom2.txt', 'custom2', 'tax_map2.txt')
+    batch_blastn('batch2.txt', 'custom2', 'output2.txt')
+    dataframe(r'/home/centos/blast+/outputs/output2.txt')
+    hist_me_up(r'/home/centos/project/outputs/histogram3.png')
+    if empty_df == False:
+        R_script('/home/centos/project/code/Script2.R')
     # calling functions
+    # data frames are exported as .csv files
+    # Second R script is run if data frame contains data
