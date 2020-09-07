@@ -73,3 +73,18 @@ hybrid <- hybrid + xlab("Strain") + ylab("Total Intergenic Space")
 hybrid
 dev.off()
 # hybrid (bar/line) of intergenic space by strain and number of accessions
+
+df8 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,15))
+#reading in relevant columns
+df8 <- aggregate(df8$ambiguous_seqs, by=list(staxid=df8$staxid), FUN=sum)
+# taking sum of ambiguous sequences aggregated on staxid
+df8 <- rename(df8, c("x"="total_ambig_seqs"))
+df8$staxid <- as.factor(df8$staxid)
+png('/home/centos/project/outputs/bar4.png')
+bar <- ggplot(df8) + 
+  geom_col(aes(x = staxid, y = total_ambig_seqs), size = 1, color = "black", fill = "green")
+bar <- bar + ggtitle("Total number of ambiguous sequences across yeast strains") + theme(plot.title=element_text(face="bold"))
+bar <- bar + xlab("Strain") + ylab("Total number of ambiguous sequences")
+bar
+dev.off()
+# bar chart plotted of total number of ambiguous sequences across yeast strains is pooped out as .png file
