@@ -32,6 +32,7 @@ Automation:
 19. blastn search is conducted with intergenic sequences from APC1.2 as the query and intergenic sequences from other strains as subjects
 20. Histogram of query coverage plotted for intergenic sequences
 21. Bar chart plotted showing mean query coverage for intergenic sequences across strains
+22. 'N's are accounted for in intergenic sequence comparison - graph plotted to reflect number of ambiguous sequences per strain 
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
