@@ -158,6 +158,24 @@ def extract_intergenic_seqs():
     df['inter_seqs'] = column
     # intergenic sequences are extracted and added to dataframe
 
+def account_for_Ns():
+    column = []
+    for i in range(len(df.inter_seqs)):
+        count = 0
+        sequence = df.inter_seqs[i]
+        if sequence == 'N/A':
+            column.append(0)
+        elif sequence.find('N') > -1:
+            for codon in sequence:
+                if codon == 'N':
+                    count += 1
+            df.intergenic_space[i] = df.intergenic_space[i] - count
+            column.append(1)
+        else:
+            column.append(0)
+    df['ambiguous_seqs'] = column
+    # 'N's are accounted for: Removed from sequence length and number of ambigous sequences for is recorded for each strain
+
 def batch_from_string():
     with open(r'/home/centos/project/genes/batch2.txt', 'w') as f:
         count = 1
@@ -212,6 +230,7 @@ if __name__ == '__main__':
     DNDS()
     intergenic_space_count()
     extract_intergenic_seqs()
+    account_for_Ns()
     df.to_csv(r'/home/centos/project/dfs/df1.csv')
     R_script('/home/centos/project/code/Script1.R')
     batch_from_string()
