@@ -220,8 +220,10 @@ def R_script(script):
     # R script is run
 
 if __name__ == '__main__':
-    pre_db()
     batch_q()
+    os.system('python3 /home/centos/project/code/taxmap_generator.py')
+    # generating taxonomic map
+    pre_db()
     make_blast_db('custom.txt','custom_db','tax_map1.txt')
     batch_blastn('batch.txt','custom_db','output.txt')
     dataframe(r'/home/centos/blast+/outputs/output.txt')
