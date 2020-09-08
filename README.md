@@ -4,9 +4,8 @@ Pipeline optimised to run on Test VM hosted on CLIMB.
 User Input: 
 1. .fasta files containing query sequences (/home/centos/project/genes)
 2. .fasta files containing subject genomes (/home/centos/project/genomes)
-3. Taxonomic map (accession-organismID)(/home/centos/blast+/tax_map/tax_map1.txt)
-4. Predicted clusters (based on histogram)
-5. File path for databases - '/home/centos/blast+/dbs'
+3. Predicted clusters (based on histogram)
+4. File path for databases - '/home/centos/blast+/dbs'
 
 IMPORTANT: At the moment, for some reason, file data is not overwritten but added to, therefore it is necessary to either delete all existing output files or change names of files before each run
 
