@@ -4,87 +4,81 @@ library(ggplot2)
 library(RColorBrewer)
 # importing prerequisites
 
-df <- fread('/home/centos/blast+/outputs/output.txt',select=c(2,5))
-# importing relevant columns from .csv table of blast output
-krusk <- kruskal.test(df$qcovs,df$staxid)
-chars <- capture.output(print(krusk))
-writeLines(chars, con = file("/home/centos/project/outputs/Krusk.txt"))
-# data is not normally distributed and not matched pairs
-# Kruskal-Wallis test is used to explore variation in qcovs between strains
-# output is saved as .txt file
-unstacked.qcovs = unstack(df[,c(2,1)])
+reference <- fread ('/home/centos/project/dfs/reference.csv',select=c(11))
+# creating reference
+
+query_coverage_across_strains <- function(path,gene) {
+  df <- fread(path,select=c(3,6))
+  # importing relevant columns from .csv table of blast output
+  krusk <- kruskal.test(df$qcovs,df$staxid)
+  chars <- capture.output(print(krusk))
+  path2 = sprintf("/home/centos/project/outputs/%s_krusk.txt",gene)
+  writeLines(chars, con=file(path2))
+  # data is not normally distributed and not matched pairs
+  # Kruskal-Wallis test is used to explore variation in qcovs between strains
+  # output is saved as .txt file
+  unstacked.qcovs = unstack(df[,c(2,1)])
+  boxplot(unstacked.qcovs,col='yellow')
+  mtext('Strain Index', side=1, line=3, col='blue')
+  mtext('Query Coverage', side=2, line=3, col='blue', las=0)
+  title(main=gene, col='black',cex=1.2)
+  boxplot
+  # boxplot is created (in .png file) to visualise data
+}
+
+cluster_distribution <- function(path,gene) {
+  df2 <- fread(path,select=c(3,4,11))
+  # importing relevant columns from .csv table of blast output
+  df3 <- ddply(df2,~staxid+clusters,summarise,accession_count=length(unique(sacc)))
+  df3$staxid <- as.factor(df3$staxid)
+  # creating new dataframe: number of unique accesion codes counted, aggregated on tax id and cluster
+  path2 = sprintf('/home/centos/project/outputs/%s_cluster_distribution.png',gene)
+  no_colours = length(unique(df3$staxid))
+  myColors <- brewer.pal(no_colours, "Set3")
+  bar <- ggplot(df3, aes(x=clusters, y=accession_count, fill=staxid)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
+  bar <- bar + ggtitle("Distribution of gene clusters across strains") + theme(plot.title=element_text(face="bold"))
+  bar <- bar + scale_fill_discrete(name="Strain\nIndex")
+  bar <- bar + xlab("Cluster") + ylab("Accession Count")
+  bar
+  ggsave(path2)
+  # barchart is created (in .png file) to visualise data
+}
+
+Intergenic_Space_Distribution <- function(cluster) {
+  path = sprintf('/home/centos/project/dfs/cluster%s.csv',cluster)
+  print(path)
+  df5 <- fread(path,select=c(3,4,7,8))
+  df5$staxid <- as.factor(df5$staxid)
+  df6 <- ddply(df5,~gene_pair+staxid,summarise,accession_count=length(unique(sacc)))
+  df7 <- aggregate(df5$intergenic_space, by=list(staxid=df5$staxid, gene_pair=df5$gene_pair), FUN=sum)
+  df7 <- rename(df7, c("x"="intergenic_space"))
+  JoinedDT <- merge(df6,df7)
+  JoinedDT$average_intergenic_space_per_accession <- JoinedDT$intergenic_space/JoinedDT$accession_count
+  path2 = sprintf('/home/centos/project/outputs/cluster%s_intergenic_space_distribution.png',cluster)
+  no_colours = length(unique(JoinedDT$gene_pair))
+  myColors <- brewer.pal(no_colours, "Set3")
+  bar <- ggplot(JoinedDT, aes(x=staxid, y=average_intergenic_space_per_accession, fill=gene_pair)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
+  bar <- bar + ggtitle("Distribution of intergenic space across pul cluster in different strains") + theme(plot.title=element_text(face="bold"))
+  bar <- bar + scale_fill_discrete(name="Gene\nPair")
+  bar <- bar + xlab("Strain") + ylab("Total Intergenic Space/Accession")
+  bar
+  ggsave(path2)
+  # multivariate bar chart plotted reflecting distribution of intergenic space across gene pairs across strains in cluster
+}
+
 png('/home/centos/project/outputs/boxplot.png')
-boxplot(unstacked.qcovs,col='yellow')
-mtext('Strain Index', side=1, line=3, col='blue')
-mtext('Query Coverage', side=2, line=3, col='blue', las=0)
-title(main='Box and whisker plot of query coverage across yeast strains', col='black',cex=1.2)
+par(mfrow = c(2,2), oma = c(0,0,2,0))
+query_coverage_across_strains('/home/centos/project/dfs/pul1.csv','pul1')
+query_coverage_across_strains('/home/centos/project/dfs/pul2.csv','pul2')
+query_coverage_across_strains('/home/centos/project/dfs/pul3.csv','pul3')
+query_coverage_across_strains('/home/centos/project/dfs/pul4.csv','pul4')
+mtext("Graph to show query coverage (relative to APC1.2 - Strain 1) of homologs\n of each gene (pul1-4) in different yeast strains",side=3,outer=TRUE,padj=3, line=5)
 dev.off()
-# boxplot is created (in .png file) to visualise data
-
-df2 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,4,11))
-# importing relevant columns from .csv table of blast output
-df3 <- ddply(df2,~staxid+clusters,summarise,accession_count=length(unique(sacc)))
-df3$staxid <- as.factor(df3$staxid)
-# creating new dataframe: number of unique accesion codes counted, aggregated on tax id and cluster
-png('/home/centos/project/outputs/barchart.png')
-no_colours = length(unique(df3$clusters))
-myColors <- brewer.pal(no_colours, "Set3")
-names(myColors) <- length(unique(df3$sacc))
-bar <- ggplot(df3, aes(x=clusters, y=accession_count, fill=staxid)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
-bar <- bar + ggtitle("Distribution of gene clusters across accessions and across strains") + theme(plot.title=element_text(face="bold"))
-bar <- bar + scale_fill_discrete(name="Strain\nIndex")
-bar <- bar + xlab("Cluster") + ylab("Accession Count")
-bar
-dev.off()
-# barchart is created (in .png file) to visualise data
-
-df4 <- fread('/home/centos/project/dfs/df1.csv',select=c(2,3,12))
-png('/home/centos/project/outputs/hist2.png')
-hist(df4$`dnds`,xlab='dn/ds',main='Distribution of dn/ds')
-# histogram of dn/ds plotted
-dev.off()
-df7 <- aggregate(df4$dnds, by=list(staxid=df4$staxid, qacc=df4$qacc), FUN=mean)
-df7 <- rename(df7, c("x"="mean_dnds"))
-png('/home/centos/project/outputs/barchart2.png')
-no_colours = length(unique(df7$qacc))
-myColors <- brewer.pal(no_colours, "Set1")
-bar2 <- ggplot(df7, aes(x=staxid, y=mean_dnds, fill=qacc)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
-bar2 <- bar2 + ggtitle("Distrbituion of mean dn/ds across genes and across strains") + theme(plot.title=element_text(face="bold"))
-bar2 <- bar2 + scale_fill_discrete(name="Gene")
-bar2 <- bar2 + xlab("Strain") + ylab("mean dn/ds")
-bar2
-dev.off()
-# multivariate bar chart of dn/ds by strain and genes
-
-df5 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,13))
-df5 <- aggregate(df5$intergenic_space, by=list(staxid=df5$staxid), FUN=sum)
-df5 <- rename(df5, c("x"="intergenic_space"))
-df6 <- ddply(df2,~staxid,summarise,accession_count=length(unique(sacc)))
-JoinedDT <- merge(df5,df6)
-JoinedDT$staxid <- as.factor(JoinedDT$staxid)
-png('/home/centos/project/outputs/hybrid.png')
-scale <- max(JoinedDT$intergenic_space)/max(JoinedDT$accession_count)
-hybrid <- ggplot(JoinedDT) + 
-  geom_col(aes(x = staxid, y = intergenic_space), size = 1, color = "darkblue", fill = "white") +
-  geom_line(aes(x = staxid, y = scale*accession_count), size = 1.5, color="red", group = 1) + 
-  scale_y_continuous(sec.axis = sec_axis(~./scale, name = "Accession Count"))
-hybrid <- hybrid + ggtitle("Distribution of intergenic space across strains and accessions") + theme(plot.title=element_text(face="bold"))
-hybrid <- hybrid + xlab("Strain") + ylab("Total Intergenic Space")
-hybrid
-dev.off()
-# hybrid (bar/line) of intergenic space by strain and number of accessions
-
-df8 <- fread('/home/centos/project/dfs/df1.csv',select=c(3,15))
-#reading in relevant columns
-df8 <- aggregate(df8$ambiguous_seqs, by=list(staxid=df8$staxid), FUN=sum)
-# taking sum of ambiguous sequences aggregated on staxid
-df8 <- rename(df8, c("x"="total_ambig_seqs"))
-df8$staxid <- as.factor(df8$staxid)
-png('/home/centos/project/outputs/bar4.png')
-bar <- ggplot(df8) + 
-  geom_col(aes(x = staxid, y = total_ambig_seqs), size = 1, color = "black", fill = "green")
-bar <- bar + ggtitle("Total number of ambiguous sequences across yeast strains") + theme(plot.title=element_text(face="bold"))
-bar <- bar + xlab("Strain") + ylab("Total number of ambiguous sequences")
-bar
-dev.off()
-# bar chart plotted of total number of ambiguous sequences across yeast strains is pooped out as .png file
+par(mfrow = c(1,1))
+cluster_distribution('/home/centos/project/dfs/pul1.csv','pul1')
+cluster_distribution('/home/centos/project/dfs/pul2.csv','pul2')
+cluster_distribution('/home/centos/project/dfs/pul3.csv','pul3')
+cluster_distribution('/home/centos/project/dfs/pul4.csv','pul4')
+for (val in unique(reference$clusters)) {
+  try(Intergenic_Space_Distribution(val), silent=T)
+}
