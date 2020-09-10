@@ -8,6 +8,7 @@ User Input:
 4. File path for databases - '/home/centos/blast+/dbs'
 
 IMPORTANT: For clearance after each run use file_clearance.py
+
 Automation:
 1. taxonomic map is created from accessions of interest
 2. .fasta files containing query sequences are concatenated to form batch query
