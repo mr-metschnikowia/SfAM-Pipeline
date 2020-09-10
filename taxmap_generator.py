@@ -25,13 +25,12 @@ if __name__ == '__main__':
         x += 1
     # database made from each genome (FASTA)
     x = 0
-    tax_dbs = [0,1,2,3,4]
     for db in tax_dbs:
         y = '{}.txt'.format(x)
         batch_blastn('batch.txt', db, y)
         x += 1
     # batch query blasted against each genome to identify accessions of interest
-    x = 0
+    x = 1
     for file in os.listdir(r'/home/centos/blast+/pre_taxmaps'):
         path = r'/home/centos/blast+/pre_taxmaps/{}'.format(file)
         with open(path, 'r') as f:
