@@ -63,8 +63,7 @@ def clusterize():
     global prediction
     column = df.qcovs
     array = column.values
-    # prediction = int(input('Please predict number of clusters:'))
-    prediction = 5
+    prediction = int(input('Please predict number of clusters:'))
     compatible = array.reshape(-1,1)
     km = KMeans(n_clusters=prediction,random_state=0).fit(compatible)
     labels = km.labels_
@@ -245,14 +244,14 @@ def R_script(script):
     # R script is run
 
 if __name__ == '__main__':
-    # batch_q()
-    # os.system('python3 /home/centos/project/code/taxmap_generator.py')
-    # # generating taxonomic map
-    # pre_db()
-    # make_blast_db('custom.txt','custom_db','tax_map1.txt')
-    # batch_blastn('batch.txt','custom_db','output.txt')
+    batch_q()
+    os.system('python3 /home/centos/project/code/taxmap_generator.py')
+    # generating taxonomic map
+    pre_db()
+    make_blast_db('custom.txt','custom_db','tax_map1.txt')
+    batch_blastn('batch.txt','custom_db','output.txt')
     dataframe(r'/home/centos/blast+/outputs/output.txt')
-    # hist_me_up(r'/home/centos/project/outputs/histogram.png')
+    hist_me_up(r'/home/centos/project/outputs/histogram.png')
     clusterize()
     genes = ['pul1', 'pul2', 'pul3', 'pul4']
     grouped = df.groupby(df.qacc)
@@ -316,6 +315,9 @@ if __name__ == '__main__':
     # intergenic sequence length calculated for each dataframe split by cluster
     # each intergenic sequence is assigned a gene pair
     R_script('/home/centos/project/code/Script1.R')
+    # R script is run
+
+
     # account_for_Ns()
     # df.to_csv(r'/home/centos/project/dfs/df1.csv')
     # R_script('/home/centos/project/code/Script1.R')
