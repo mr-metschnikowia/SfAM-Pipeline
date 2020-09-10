@@ -31,14 +31,15 @@ cluster_distribution <- function(path,gene) {
   # importing relevant columns from .csv table of blast output
   df3 <- ddply(df2,~staxid+clusters,summarise,accession_count=length(unique(sacc)))
   df3$staxid <- as.factor(df3$staxid)
+  df3$clusters <- as.factor(df3$clusters)
   # creating new dataframe: number of unique accesion codes counted, aggregated on tax id and cluster
   path2 = sprintf('/home/centos/project/outputs/%s_cluster_distribution.png',gene)
-  no_colours = length(unique(df3$staxid))
+  no_colours = length(unique(df3$clusters))
   myColors <- brewer.pal(no_colours, "Set3")
-  bar <- ggplot(df3, aes(x=clusters, y=accession_count, fill=staxid)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
+  bar <- ggplot(df3, aes(x=staxid, y=accession_count, fill=clusters)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
   bar <- bar + ggtitle("Distribution of gene clusters across strains") + theme(plot.title=element_text(face="bold"))
-  bar <- bar + scale_fill_discrete(name="Strain\nIndex")
-  bar <- bar + xlab("Cluster") + ylab("Accession Count")
+  bar <- bar + scale_fill_discrete(name="Cluster")
+  bar <- bar + xlab("Strain") + ylab("Accession Count")
   bar
   ggsave(path2)
   # barchart is created (in .png file) to visualise data
