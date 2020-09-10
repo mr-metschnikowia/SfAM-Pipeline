@@ -7,8 +7,7 @@ User Input:
 3. Predicted clusters (based on histogram)
 4. File path for databases - '/home/centos/blast+/dbs'
 
-IMPORTANT: At the moment, for some reason, file data is not overwritten but added to, therefore it is necessary to either delete all existing output files or change names of files before each run
-
+IMPORTANT: For clearance after each run use file_clearance.py
 Automation:
 1. taxonomic map is created from accessions of interest
 2. .fasta files containing query sequences are concatenated to form batch query
