@@ -17,14 +17,20 @@ def batch_blastn(query,db,output):
 
 if __name__ == '__main__':
     tax_dbs = []
-    x = 0
+    file_names = []
+    x = 1
     for file in os.listdir(r'/home/centos/project/genomes'):
+        file_name_optimized = file.split('.')[0] + ' {}\n'.format(x)
+        file_names.append(file_name_optimized)
         database = '{}'.format(x)
         make_blast_db1(file, database)
         tax_dbs.append(database)
         x += 1
     # database made from each genome (FASTA)
-    x = 0
+    with open(r'/home/centos/blast+/tax_maps/reference.txt','w') as f:
+        f.writelines(file_names)
+    # reference is created from file names (as order is preserved when staxid is allocated)
+    x = 1
     for db in tax_dbs:
         y = '{}.txt'.format(x)
         batch_blastn('batch.txt', db, y)
@@ -44,3 +50,4 @@ if __name__ == '__main__':
         with open(r'/home/centos/blast+/tax_maps/tax_map1.txt','a') as g:
             g.writelines(new_data)
     # taxonomic map is created with all accessions of interest in same strain assigned same taxonomic id
+
