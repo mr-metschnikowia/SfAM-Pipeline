@@ -3,7 +3,7 @@ Pipeline optimised to run on Test VM hosted on CLIMB.
 
 User Input: 
 1. .fasta files containing query sequences (/home/centos/project/genes)
-2. .fasta files containing subject genomes (/home/centos/project/genomes)
+2. .fasta files containing subject genomes (/home/centos/project/genomes) - names should be strain name (no '.'s in name)
 3. Predicted clusters (based on histogram)
 4. File path for databases - '/home/centos/blast+/dbs'
 
