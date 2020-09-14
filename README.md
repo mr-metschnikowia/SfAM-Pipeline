@@ -34,8 +34,8 @@ Automation:
 16. Cluster dataframes with intergenic information are read into R
 17. Multivariate bar chart is plotted to relfect distribution of intergenic space across gene pairs in different strains (cluster specific):
       For this a new metric is created: Average intergenic space per accession (to take accession count into account)
-18. Multivariate bar chart is plotted for each cluster to facilitate comparison of pul cluster area across strains and accessions
-18. Specific intergenic sequence similarity???????
+18. Box plot is created to reflect distribution of intergenic space across gene pairs
+19. Multivariate bar chart is plotted for each cluster to facilitate comparison of pul cluster area across strains and accessions
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
