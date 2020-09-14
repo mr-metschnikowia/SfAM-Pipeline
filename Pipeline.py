@@ -107,7 +107,7 @@ def DNDS():
             try:
                 x = round(dnds(reference, seq2), 3)
             except ZeroDivisionError:
-                x = 0
+                x = 'N/A'
             except ValueError:
                 x = 'math_error'
             column.append(x)
@@ -181,6 +181,57 @@ def extract_intergenic_seqs():
             column.append(inter_seq)
     df['inter_seqs'] = column
     # intergenic sequences are extracted and added to dataframe
+
+def total_space():
+    global ready_df
+    global name
+    fragments_of_total_area = []
+    for i in range(len(ready_df.sstart)):
+        gene_and_intergenic_space = (ready_df.send[i] - ready_df.sstart[i]) + ready_df.intergenic_space[i]
+        fragments_of_total_area.append(gene_and_intergenic_space)
+    ready_df['gene_length_and_intergenic_space'] = fragments_of_total_area
+    # adds intergenic space to gene length
+    staxids = []
+    saccs = []
+    total_space = []
+    to_sum = []
+    for i in range(len(ready_df.sstart)):
+        if i < len(ready_df.sstart) - 1 and ready_df.sacc[i] == ready_df.sacc[i + 1]:
+            to_sum.append(ready_df.gene_length_and_intergenic_space[i])
+        else:
+            staxids.append(ready_df.staxid[i])
+            saccs.append(ready_df.sacc[i])
+            to_sum.append(ready_df.gene_length_and_intergenic_space[i])
+            product = 0
+            for number in to_sum:
+                product = product + number
+            total_space.append(product)
+            to_sum = []
+    df_of_total_space = pd.DataFrame(list(zip(staxids, saccs, total_space)), columns=['staxid', 'sacc', 'total_space'])
+    # total space calculated for each accession
+    # new dataframe is created using staxid, sacc and total space
+    saccs = []
+    column = []
+    count = 2
+    for i in range(len(df_of_total_space.staxid)):
+        if i == 0:
+            column.append(1)
+            saccs.append(df_of_total_space.sacc[i])
+        elif df_of_total_space.staxid[i] == df_of_total_space.staxid[i - 1]:
+            if df_of_total_space.sacc[i] in saccs:
+                continue
+            else:
+                column.append(count)
+                saccs.append(df_of_total_space.sacc[i])
+                count += 1
+        else:
+            column.append(1)
+            saccs.append(df_of_total_space.sacc[i])
+            count = 2
+    df_of_total_space['sacc_count'] = column
+    df_of_total_space.to_csv(r'/home/centos/project/dfs/{}_total_space.csv'.format(name))
+    # new metric created - chromosome count for each strain
+    # total_space dataframe is exported as .csv
 
 def account_for_Ns():
     column = []
@@ -308,6 +359,7 @@ if __name__ == '__main__':
             del ready_df[item]
         intergenic_space_count()
         GenePair()
+        total_space()
         culprits = ready_df[ready_df['gene_pair'] == 'NA'].index
         ready_df.drop(culprits, inplace = True)
         if len(ready_df.qacc) > 0:
