@@ -233,63 +233,6 @@ def total_space():
     # new metric created - chromosome count for each strain
     # total_space dataframe is exported as .csv
 
-def account_for_Ns():
-    column = []
-    for i in range(len(df.inter_seqs)):
-        count = 0
-        sequence = df.inter_seqs[i]
-        if sequence == 'N/A':
-            column.append(0)
-        elif sequence.find('N') > -1:
-            for codon in sequence:
-                if codon == 'N':
-                    count += 1
-            df.intergenic_space[i] = df.intergenic_space[i] - count
-            column.append(1)
-        else:
-            column.append(0)
-    df['ambiguous_seqs'] = column
-    # 'N's are accounted for: Removed from sequence length and number of ambigous sequences for is recorded for each strain
-
-def batch_from_string():
-    with open(r'/home/centos/project/genes/batch2.txt', 'w') as f:
-        count = 1
-        tax_codes = []
-        for i in range(len(df.sacc)):
-            if df.sacc[i] == 'CP034458' and type(df.inter_seqs[i]) == str:
-                new_acc = '{}.{}'.format(df.sacc[i],count)
-                tax_codes.append(new_acc + ' 1\n')
-                f.write('>{}\n'.format(new_acc))
-                f.write(df.inter_seqs[i])
-                f.write('\n')
-                count +=1
-        with open(r'/home/centos/blast+/tax_maps/tax_map2.txt','w') as f:
-            f.writelines(tax_codes)
-
-def database_from_string():
-    with open(r'/home/centos/project/genomes/custom2.txt', 'w') as f:
-        scanned = []
-        count = 1
-        staxid = 1
-        tax_codes = []
-        for i in range(len(df.sacc)):
-            if df.sacc[i] == 'CP034458':
-                continue
-            elif type(df.inter_seqs[i]) == str:
-                if df.sacc[i] in scanned:
-                    count += 1
-                else:
-                    count = 1
-                    staxid += 1
-                new_acc = '{}.{}'.format(df.sacc[i], count)
-                tax_codes.append(new_acc + ' {}\n'.format(staxid))
-                f.write('>{}\n'.format(new_acc))
-                f.write(df.inter_seqs[i])
-                f.write('\n')
-                scanned.append(df.sacc[i])
-        with open(r'/home/centos/blast+/tax_maps/tax_map2.txt','a') as f:
-            f.writelines(tax_codes)
-
 def R_script(script):
     os.system('/usr/bin/Rscript' + ' {}'.format(script))
     # R script is run
@@ -368,19 +311,3 @@ if __name__ == '__main__':
     # each intergenic sequence is assigned a gene pair
     R_script('/home/centos/project/code/Script1.R')
     # R script is run
-
-
-    # account_for_Ns()
-    # df.to_csv(r'/home/centos/project/dfs/df1.csv')
-    # R_script('/home/centos/project/code/Script1.R')
-    # batch_from_string()
-    # database_from_string()
-    # make_blast_db('custom2.txt', 'custom2', 'tax_map2.txt')
-    # batch_blastn('batch2.txt', 'custom2', 'output2.txt')
-    # dataframe(r'/home/centos/blast+/outputs/output2.txt')
-    # hist_me_up(r'/home/centos/project/outputs/histogram3.png')
-    # if empty_df == False:
-    #     R_script('/home/centos/project/code/Script2.R')
-    # calling functions
-    # data frames are exported as .csv files
-    # Second R script is run if data frame contains data
