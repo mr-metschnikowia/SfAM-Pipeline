@@ -100,7 +100,9 @@ dnds_distribution <- function(cluster) {
       df11 <- df11[!(df11$value=="math_error"),]
       df11$value <- as.numeric(df11$value)
       sub_title <- sprintf('%s', val)
-      hist <- hist(df11$value,main=sub_title,xlab='dn/ds', col='red')
+      hist <- hist(df11$value, plot=F)
+      hist$density = hist$counts/sum(hist$counts)*100
+      plot(hist,main=sub_title,xlab='dn/ds',col='red',freq=FALSE)
     }
   }
   title <- sprintf("Distribution of dn/ds in cluster %s by gene",cluster)
@@ -148,7 +150,7 @@ for (val in unique(reference$clusters)) {
 }
 # box_plot_intergenic_space function is called for each cluster 
 for (val in unique(reference$clusters)) {
-  try(dnds_distribution(val), silent=T)
+  try(dnds_distribution(val), silent=F)
 }
 # dnds function is called for each cluster 
 for (val in unique(reference$clusters)) {
