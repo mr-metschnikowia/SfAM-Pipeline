@@ -68,6 +68,22 @@ Intergenic_Space_Distribution <- function(cluster) {
   # multivariate bar chart plotted reflecting distribution of intergenic space across gene pairs across strains in cluster
 }
 
+box_plot_intergenic_space <- function(cluster) {
+  path <- sprintf('/home/centos/project/dfs/cluster%s.csv',cluster)
+  df <- fread (path,select=c(3,7,8))
+  df$staxid <- as.factor(df$staxid)
+  df2 <- unstack(df, form=intergenic_space~gene_pair)
+  path2 = sprintf('/home/centos/project/outputs/intergenic_box_cluster%s.png',cluster)
+  png(path2)
+  boxplot(df2,col='yellow')
+  mtext('Gene Pair', side=1, line=3, col='blue')
+  mtext('Intergenic Space', side=2, line=3, col='blue', las=0)
+  title = 'Boxplot to show distribution of intergenic space between individual gene pairs'
+  title(main=title, col='black',cex=1.2)
+  dev.off()
+}
+# boxplot is created to show distribution of intergenic space across gene pairs
+
 dnds_distribution <- function(cluster) {
   genes <- c('pul1','pul2','pul3','pul4')
   path = sprintf('/home/centos/project/outputs/dnds_histo_cluster%s.png',cluster)
@@ -127,6 +143,10 @@ cluster_distribution('/home/centos/project/dfs/pul4.csv','pul4')
 for (val in unique(reference$clusters)) {
   try(Intergenic_Space_Distribution(val), silent=T)
 }
+for (val in unique(reference$clusters)) {
+  try(box_plot_intergenic_space(val), silent=T)
+}
+# box_plot_intergenic_space function is called for each cluster 
 for (val in unique(reference$clusters)) {
   try(dnds_distribution(val), silent=T)
 }
