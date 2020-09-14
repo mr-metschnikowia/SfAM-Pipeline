@@ -17,7 +17,7 @@ Automation:
 5. Ouput is converted to pandas dataframe 
 6. Histogram of qcovs is plotted to show distribution (ouput: .png file)
 7. Hits are clustered based on qcovs using kmeans
-8. master dataframe is fractured into gene specific dataframes
+8. Master dataframe is fractured into gene specific dataframes
 9. Gene specific dataframes are exported as .csv files
 10. Gene specific dataframes are used for the following:
       Kruskal-Wallis is conducted to test for significant difference in query coverage across strains (seperate test for each gene)
@@ -25,14 +25,16 @@ Automation:
       For each gene: distribution of gene clusters across accessions in each strain 
 11. Gene specific dataframes are further fractured into gene-cluster specific dataframes
 12. DNDS is performed for each of these new dataframes - new column added for dnds of each hit against all other hits 
-13 PLOT DNDS???????????????
+13 Histogram of dnds is plotted for each gene in each cluster
 14. master dataframe is split into new dataframes based on cluster
 15. Intergenic sequences are examined separatly for each cluster:
       Length of intergenic sequences between genes on same accession in same strain is calculated
       Each length is assigned a standardised gene pair
+      Total pul cluster size is captured
 16. Cluster dataframes with intergenic information are read into R
 17. Multivariate bar chart is plotted to relfect distribution of intergenic space across gene pairs in different strains (cluster specific):
       For this a new metric is created: Average intergenic space per accession (to take accession count into account)
+18. Multivariate bar chart is plotted for each cluster to facilitate comparison of pul cluster area across strains and accessions
 18. Specific intergenic sequence similarity???????
 
 All figures stored in - /home/centos/project/outputs
