@@ -5,6 +5,7 @@ library(RColorBrewer)
 # importing prerequisites
 
 reference <- fread ('/home/centos/project/dfs/reference.csv',select=c(11))
+reference$clusters <- as.factor(reference$clusters)
 # creating reference
 
 query_coverage_across_strains <- function(path,gene) {
@@ -67,6 +68,49 @@ Intergenic_Space_Distribution <- function(cluster) {
   # multivariate bar chart plotted reflecting distribution of intergenic space across gene pairs across strains in cluster
 }
 
+dnds_distribution <- function(cluster) {
+  genes <- c('pul1','pul2','pul3','pul4')
+  path = sprintf('/home/centos/project/outputs/dnds_histo_cluster%s.png',cluster)
+  png(path)
+  par(mfrow = c(2,2), oma = c(0,0,2,0))
+  for (val in genes) {
+    try
+    {
+      path2 <- sprintf('/home/centos/project/dfs/dnds_%s_cluster%s.csv', val, cluster)
+      df10 <- fread(path2)
+      df10 <- within(df10, rm(V1,sseq))
+      df11 <- melt(df10, id.vars=1:2)
+      df11 <- df11[!(df11$value=="N/A"),]
+      df11 <- df11[!(df11$value=="math_error"),]
+      df11$value <- as.numeric(df11$value)
+      sub_title <- sprintf('%s', val)
+      hist <- hist(df11$value,main=sub_title,xlab='dn/ds', col='red')
+    }
+  }
+  title <- sprintf("Distribution of dn/ds in cluster %s by gene",cluster)
+  mtext(title,side=3,outer=TRUE,padj=3, line=2, font=4)
+  dev.off()
+}
+# histogram od dnds created for each gene in each cluster
+
+total_space <- function(cluster) {
+  path = sprintf('/home/centos/project/dfs/cluster%s_total_space.csv', cluster)
+  df_total_space <- fread(path ,select=c(2,4,5))
+  df_total_space$staxid <- as.factor(df_total_space$staxid)
+  df_total_space$sacc_count <- as.factor(df_total_space$sacc_count)
+  no_colours = length(unique(df_total_space$sacc_count))
+  myColors <- brewer.pal(no_colours, "Set3")
+  path2 = sprintf('/home/centos/project/outputs/cluster%s_total_space.png', cluster)
+  png(path2)
+  bar <- ggplot(df_total_space, aes(x=staxid, y=total_space, fill=sacc_count)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
+  bar <- bar + ggtitle("SIze of pul cluster (base pairs) across strains") + theme(plot.title=element_text(face="bold"))
+  bar <- bar + scale_fill_discrete(name="Accession\nCount")
+  bar <- bar + xlab("Strain") + ylab("Cluster Size (base pairs)")
+  bar
+  ggsave(path2)
+}
+# multivariate barchart of total pul cluster area across strains is created for each cluster 
+
 png('/home/centos/project/outputs/boxplot.png')
 par(mfrow = c(2,2), oma = c(0,0,2,0))
 query_coverage_across_strains('/home/centos/project/dfs/pul1.csv','pul1')
@@ -83,3 +127,11 @@ cluster_distribution('/home/centos/project/dfs/pul4.csv','pul4')
 for (val in unique(reference$clusters)) {
   try(Intergenic_Space_Distribution(val), silent=T)
 }
+for (val in unique(reference$clusters)) {
+  try(dnds_distribution(val), silent=T)
+}
+# dnds function is called for each cluster 
+for (val in unique(reference$clusters)) {
+  try(total_space(val), silent=T)
+}
+# total_space function is called for each cluster 
