@@ -66,9 +66,9 @@ def blastn():
     # pul gene dna blasted against database of gene dna (other strain)
 
 if __name__ == '__main__':
-    # make_blast_db1()
-    # blastx()
-    # parse_protein_data()
-    # find_dna_sequences()
-    # make_blast_db2()
+    make_blast_db1()
+    blastx()
+    parse_protein_data()
+    find_dna_sequences()
+    make_blast_db2()
     blastn()
