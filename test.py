@@ -23,12 +23,13 @@ def blastx():
 
 def parse_protein_data():
     global locus_tags
+    locus_tags = []
     with open(r'c:/users/rhino/blast+/Outputs/k.lactis_proteins.txt', 'r') as f:
         data = f.readlines()
-        locus_tags = []
         for line in data:
             target = 'locus_tag='
-            new_line = line[line.find(target) + len(target): line.find(']')]
+            new_line = line[line.find(target):]
+            new_line = new_line[len(target): new_line.find(']')]
             locus_tags.append(new_line)
     # locus_tags of hits are extracted
 
@@ -42,8 +43,8 @@ def find_dna_sequences():
             for gene in data:
                 result = gene.find(tag)
                 if result > -1:
-                    gene = '>' + gene
-                    genes.append(gene)
+                    new_gene = '>' + gene
+                    genes.append(new_gene)
     with open(r'c:\users\rhino\blast+\db_stage1\k.lactis_genes.txt','w') as f:
         f.writelines(genes)
     # dna sequences for each locus tag are found in .fna file of cds
@@ -65,9 +66,9 @@ def blastn():
     # pul gene dna blasted against database of gene dna (other strain)
 
 if __name__ == '__main__':
-    make_blast_db1()
-    blastx()
-    parse_protein_data()
-    find_dna_sequences()
-    make_blast_db2()
+    # make_blast_db1()
+    # blastx()
+    # parse_protein_data()
+    # find_dna_sequences()
+    # make_blast_db2()
     blastn()
