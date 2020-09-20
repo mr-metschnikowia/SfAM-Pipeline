@@ -10,32 +10,20 @@ User Input:
 IMPORTANT: For clearance after each run use file_clearance.py
 
 Automation:
-1. taxonomic map is created from accessions of interest
-2. .fasta files containing query sequences are concatenated to form batch query
-3. Custom blastable database created from .fasta files containing subject genomes
-4. Interaction with command line facilitates batch homology search with custom output (qacc,staxid,sacc,pident,qcovs,sstart,send)
-5. Ouput is converted to pandas dataframe 
-6. Histogram of qcovs is plotted to show distribution (ouput: .png file)
-7. Hits are clustered based on qcovs using kmeans
-8. Master dataframe is fractured into gene specific dataframes
-9. Gene specific dataframes are exported as .csv files
-10. Gene specific dataframes are used for the following:
-      Kruskal-Wallis is conducted to test for significant difference in query coverage across strains (seperate test for each gene)
-      Boxplots are created reflecting distribution of query coverage for each strain (separate set for each gene) 
-      For each gene: distribution of gene clusters across accessions in each strain 
-11. Gene specific dataframes are further fractured into gene-cluster specific dataframes
-12. DNDS is performed for each of these new dataframes - new column added for dnds of each hit against all other hits 
-13 Histogram of dnds is plotted for each gene in each cluster
-14. master dataframe is split into new dataframes based on cluster
-15. Intergenic sequences are examined separatly for each cluster:
-      Length of intergenic sequences between genes on same accession in same strain is calculated
-      Each length is assigned a standardised gene pair
-      Total pul cluster size is captured
-16. Cluster dataframes with intergenic information are read into R
-17. Multivariate bar chart is plotted to relfect distribution of intergenic space across gene pairs in different strains (cluster specific):
-      For this a new metric is created: Average intergenic space per accession (to take accession count into account)
-18. Box plot is created to reflect distribution of intergenic space across gene pairs
-19. Multivariate bar chart is plotted for each cluster to facilitate comparison of pul cluster area across strains and accessions
+1. get_dna.py: In each strain pul gene homologs are found using one of two methods - A protein homology search, followed by extraction of corresponding DNA sequences from .fna cds file, or (closely related species only) through a simple batch balstn homology search against genomes
+2. needleall.py: Global alignments are performed using needleall EMBOSS between APC1.2 pul genes and pul genes from other species/strains.
+3. Needleall output is processed to facilitate further analyses.
+4. Pipeline.py: 
+> historgram to show distribution of needle similarity score (normalised) is created
+> kmeans clustering is used to assign each hit to a cluster based on similarity score
+> hits are segregated on genes
+> dnds is calculated for each hit versus all other hits, segregated by gene and cluster
+> intergenic space between each gene pair as well as total cluster intergenic space is calculated for each accession in each strain, segregated by cluster
+5. R_Script1:
+> boxplot showing distribution of similarity score for each gene is created
+> histogram for each gene in each cluster is created to show distribution of dn/ds
+> multivariate bar charts are created to show distribution of intergenic space between gene pairs across strains and variation in total cluster size between strains
+> boxplot is also created to reflect distribution of intergenic space for each gene pair in each cluster
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
