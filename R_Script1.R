@@ -21,29 +21,10 @@ query_coverage_across_strains <- function(path,gene) {
   unstacked.qcovs = unstack(df[,c(2,1)])
   boxplot(unstacked.qcovs,col='yellow')
   mtext('Strain Index', side=1, line=3, col='blue')
-  mtext('Query Coverage', side=2, line=3, col='blue', las=0)
+  mtext('Similarity Score', side=2, line=3, col='blue', las=0)
   title(main=gene, col='black',cex=1.2)
   boxplot
   # boxplot is created (in .png file) to visualise data
-}
-
-cluster_distribution <- function(path,gene) {
-  df2 <- fread(path,select=c(3,4,11))
-  # importing relevant columns from .csv table of blast output
-  df3 <- ddply(df2,~staxid+clusters,summarise,accession_count=length(unique(sacc)))
-  df3$staxid <- as.factor(df3$staxid)
-  df3$clusters <- as.factor(df3$clusters)
-  # creating new dataframe: number of unique accesion codes counted, aggregated on tax id and cluster
-  path2 = sprintf('/home/centos/project/outputs/%s_cluster_distribution.png',gene)
-  no_colours = length(unique(df3$clusters))
-  myColors <- brewer.pal(no_colours, "Set3")
-  bar <- ggplot(df3, aes(x=staxid, y=accession_count, fill=clusters)) + geom_bar(stat="identity") + scale_colour_manual(values=myColors)
-  bar <- bar + ggtitle("Distribution of gene clusters across strains") + theme(plot.title=element_text(face="bold"))
-  bar <- bar + scale_fill_discrete(name="Cluster")
-  bar <- bar + xlab("Strain") + ylab("Accession Count")
-  bar
-  ggsave(path2)
-  # barchart is created (in .png file) to visualise data
 }
 
 Intergenic_Space_Distribution <- function(cluster) {
@@ -78,7 +59,7 @@ box_plot_intergenic_space <- function(cluster) {
   boxplot(df2,col='yellow')
   mtext('Gene Pair', side=1, line=3, col='blue')
   mtext('Intergenic Space', side=2, line=3, col='blue', las=0)
-  title = 'Boxplot to show distribution of intergenic space between individual gene pairs'
+  title = 'Boxplot to show distribution of intergenic space\n between individual gene pairs'
   title(main=title, col='black',cex=1.2)
   dev.off()
 }
@@ -135,13 +116,9 @@ query_coverage_across_strains('/home/centos/project/dfs/pul1.csv','pul1')
 query_coverage_across_strains('/home/centos/project/dfs/pul2.csv','pul2')
 query_coverage_across_strains('/home/centos/project/dfs/pul3.csv','pul3')
 query_coverage_across_strains('/home/centos/project/dfs/pul4.csv','pul4')
-mtext("Graph to show query coverage (relative to APC1.2 - Strain 1) of homologs\n of each gene (pul1-4) in different yeast strains",side=3,outer=TRUE,padj=3, line=5)
+mtext("Graph to show similarity score (relative to APC1.2 - Strain 1) of homologs\n of each gene (pul1-4) in different yeast strains",side=3,outer=TRUE,padj=3, line=5)
 dev.off()
 par(mfrow = c(1,1))
-cluster_distribution('/home/centos/project/dfs/pul1.csv','pul1')
-cluster_distribution('/home/centos/project/dfs/pul2.csv','pul2')
-cluster_distribution('/home/centos/project/dfs/pul3.csv','pul3')
-cluster_distribution('/home/centos/project/dfs/pul4.csv','pul4')
 for (val in unique(reference$clusters)) {
   try(Intergenic_Space_Distribution(val), silent=T)
 }
