@@ -3,54 +3,20 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
 from dnds import dnds
+import Bio.codonalign.codonalignment as bio
 # importing prereqs
-
-def pre_db():
-    master_string_1 = ''
-    for file in os.listdir(r'/home/centos/project/genomes'):
-        with open(r'/home/centos/project/genomes' + '/' + file,'r') as f:
-            contents = f.read()
-            master_string_1 = master_string_1 + contents
-    with open(r'/home/centos/project/genomes/custom.txt', 'w') as f:
-        f.write(master_string_1)
-    # creates custom pre database from FASTA files in db_stage1 folder
-
-def batch_q():
-    master_string_2 = ''
-    for file in os.listdir(r'/home/centos/project/genes'):
-        with open(r'/home/centos/project/genes' + '/' + file,'r') as f:
-            contents = f.read() + '\n'
-            master_string_2 = master_string_2 + contents
-    with open(r'/home/centos/project/genes/batch.txt', 'w') as f:
-        f.write(master_string_2)
-    # creates batch query file from gene FASTA files
-
-def make_blast_db(input,output,tax_map):
-    os.system('makeblastdb -in /home/centos/project/genomes/{} -dbtype nucl -parse_seqids -out /home/centos/blast+/dbs/{} -taxid_map /home/centos/blast+/tax_maps/{}'.format(input,output,tax_map))
-    # interacts with command line - blastable database created from 'pre-database'
-
-def batch_blastn(query,db,output):
-    os.system("export BLASTDB='/home/centos/blast+/dbs'")
-    os.system('blastn -query /home/centos/project/genes/{} -db {} -out /home/centos/blast+/outputs/{} -outfmt "10 qacc staxid sacc pident qcovs sstart send qseq sseq"'.format(query,db,output))
-    # runs blast+ (blastn): batch query is blasted against custom database > output.txt file is pooped out
-    with open(r'/home/centos/blast+/outputs/{}'.format(output),'r') as f:
-        lines = f.readlines()
-    lines.insert(0,'qacc,staxid,sacc,pident,qcovs,sstart,send,qseq,sseq\n')
-    with open(r'/home/centos/blast+/outputs/{}'.format(output), 'w') as f:
-        f.writelines(lines)
-    # title line is inserted
 
 def dataframe(path):
     global df
     df = pd.read_csv(path)
-    # blast+ output is read into pandas dataframe
+    # EMBOSS needle-all output is read into pandas dataframe
 
 def hist_me_up(output):
     global empty_df
     empty_df = False
     try:
         df.hist(column='qcovs')
-        plt.ylabel('frequency'), plt.xlabel('query coverage'), plt.title('Distribution of query coverage')
+        plt.ylabel('frequency'), plt.xlabel('similarity score'), plt.title('Distribution of similarity score')
         plt.savefig(output)
     except ValueError:
         empty_df = True
@@ -82,8 +48,8 @@ def DNDS():
         column = []
         for i in range(len(target_frame2.sseq)):
             reference = target_frame2.sseq[j]
-            reference_length = len(reference)
             seq2 = target_frame2.sseq[i]
+            reference_length = len(reference)
             seq2_length = len(seq2)
             if seq2_length > reference_length:
                 seq2 = seq2[:reference_length]
@@ -104,14 +70,19 @@ def DNDS():
                 reference = reference[:-1]
                 seq2 = seq2[:-1]
             # trimming sequences that are not multiples of 3
-            try:
-                x = round(dnds(reference, seq2), 3)
-            except ZeroDivisionError:
-                x = 'N/A'
-            except ValueError:
-                x = 'math_error'
-            column.append(x)
-            # dnds calculated for each hit relative to all other hits
+            reference_opt = bio.CodonSeq(reference)
+            seq2_opt = bio.CodonSeq(seq2)
+            # sequences are optimized for dnds calculation
+            if reference == seq2:
+                dnds = 'N/A'
+                # identical sequences are accounted for
+            else:
+                x = bio.cal_dn_ds(reference_opt, seq2_opt, method="ML")
+                # dn and ds are calculated using the Maximum Likelihood model
+                dnds = x[0] / x[1]
+                # dn/ds statistic is calculated
+            column.append(dnds)
+            # add value to column
         column_name = str(target_frame2.staxid[j]) + '-{}'.format(target_frame2.sacc[j])
         target_frame2[column_name] = column
         # dnds column for each hit added to dataframe
@@ -162,25 +133,6 @@ def GenePair():
             column.append('NA')
     ready_df['gene_pair'] = column
     # for each intergenic sequence standardised gene pair is allocated
-
-def extract_intergenic_seqs():
-    with open(r'/home/centos/project/genomes/custom.txt', 'r') as f:
-        data = f.read()
-    column = []
-    for i in range(len(df.sacc)):
-        if df.intergenic_space[i] > 0:
-            data.find(df.sacc[i])
-            chunk1 = data[data.find(df.sacc[i]):]
-            chunk2 = chunk1[chunk1.find('\n'):]
-            start = df.send[i] + 1
-            end = df.sstart[i + 1]
-            inter_seq = chunk2[start:end]
-            column.append(inter_seq)
-        else:
-            inter_seq = 'N/A'
-            column.append(inter_seq)
-    df['inter_seqs'] = column
-    # intergenic sequences are extracted and added to dataframe
 
 def total_space():
     global ready_df
@@ -238,13 +190,9 @@ def R_script(script):
     # R script is run
 
 if __name__ == '__main__':
-    batch_q()
-    os.system('python3 /home/centos/project/code/taxmap_generator.py')
-    # generating taxonomic map
-    pre_db()
-    make_blast_db('custom.txt','custom_db','tax_map1.txt')
-    batch_blastn('batch.txt','custom_db','output.txt')
-    dataframe(r'/home/centos/blast+/outputs/output.txt')
+    os.system('python3 /home/centos/project/code/get_dna.py')
+    os.system('python3 /home/centos/project/code/needleall.py')
+    dataframe(r'/home/centos/project/output.csv')
     hist_me_up(r'/home/centos/project/outputs/histogram.png')
     clusterize()
     genes = ['pul1', 'pul2', 'pul3', 'pul4']
@@ -282,7 +230,7 @@ if __name__ == '__main__':
             target_frame2.to_csv(r'/home/centos/project/dfs/dnds_{}.csv'.format(name))
         else:
             with open(r'/home/centos/project/dfs/error_statement{}.txt'.format(count), 'w') as f:
-                f.write('This({}) dataframe has only has one entry'.format(name))
+                f.write('This ({}) dataframe has only one entry'.format(name))
                 count += 1
     # DNDS calculated for each dataframe split on gene and cluster
     clusters = []
