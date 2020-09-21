@@ -18,12 +18,14 @@ Automation:
 > kmeans clustering is used to assign each hit to a cluster based on similarity score
 > hits are segregated on genes
 > dnds is calculated for each hit versus all other hits, segregated by gene and cluster
+> mean dnds is calculated for each hit
 > intergenic space between each gene pair as well as total cluster intergenic space is calculated for each accession in each strain, segregated by cluster
 5. R_Script1:
 > boxplot showing distribution of similarity score for each gene is created
 > histogram for each gene in each cluster is created to show distribution of dn/ds
 > multivariate bar charts are created to show distribution of intergenic space between gene pairs across strains and variation in total cluster size between strains
 > boxplot is also created to reflect distribution of intergenic space for each gene pair in each cluster
+> relationship between gene length and mean dnds is plotted and a tested for correlation (Pearson's/Spearman's)
 
 All figures stored in - /home/centos/project/outputs
 blast+ output - /home/centos/blast+/outputs
