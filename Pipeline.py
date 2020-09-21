@@ -4,6 +4,7 @@ from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
 from dnds import dnds
 import Bio.codonalign.codonalignment as bio
+import sys
 # importing prereqs
 
 def dataframe(path):
@@ -86,6 +87,13 @@ def DNDS():
         column_name = str(target_frame2.staxid[j]) + '-{}'.format(target_frame2.sacc[j])
         target_frame2[column_name] = column
         # dnds column for each hit added to dataframe
+
+def get_length_late():
+    gene_lengths = []
+    for i in range(len(target_frame2.sseq)):
+        gene_length = len(target_frame2.sseq[i])
+        gene_lengths.append(gene_length)
+    target_frame2['length'] = gene_lengths
 
 def intergenic_space_count():
     global ready_df
@@ -233,6 +241,20 @@ if __name__ == '__main__':
                 f.write('This ({}) dataframe has only one entry'.format(name))
                 count += 1
     # DNDS calculated for each dataframe split on gene and cluster
+    for name in cluster_df_names:
+        try:
+            target_frame2 = pd.read_csv('/home/centos/project/dfs/dnds_{}.csv'.format(name))
+            unwanted = ['staxid', 'sacc', 'Unnamed: 0']
+            for item in unwanted:
+                del target_frame2[item]
+            means = target_frame2.mean(axis=0)
+            target_frame2['mean_dnds'] = list(means)
+            get_length_late()
+            del target_frame2['sseq']
+            target_frame2.to_csv('/home/centos/project/dfs/correlation_{}.csv'.format(name), index=False)
+        except:
+            continue
+    # mean dnds for each gene is calculated and gene length is recalculated
     clusters = []
     for i in range(prediction):
         clusters.append(str(i))
