@@ -90,7 +90,7 @@ dnds_distribution <- function(cluster) {
   mtext(title,side=3,outer=TRUE,padj=3, line=2, font=4)
   dev.off()
 }
-# histogram od dnds created for each gene in each cluster
+# histogram of dnds created for each gene in each cluster
 
 total_space <- function(cluster) {
   path = sprintf('/home/centos/project/dfs/cluster%s_total_space.csv', cluster)
@@ -109,6 +109,30 @@ total_space <- function(cluster) {
   ggsave(path2)
 }
 # multivariate barchart of total pul cluster area across strains is created for each cluster 
+
+correlation <- function(cluster) {
+  genes <- c('pul1','pul2','pul3','pul4')
+  path = sprintf("/home/centos/project/outputs/corr_graph_cluster%s.png",cluster)
+  png(path)
+  par(mfrow = c(2,2), oma = c(0,0,2,0))
+  for (val in genes) {
+    try
+    {
+      df <- fread (sprintf('/home/centos/project/dfs/correlation_%s_cluster%s.csv',val, cluster),select=c("length","mean_dnds"))
+      plot(df$length,df$mean_dnds, xlab="gene length",ylab="mean dnds", main=val)
+      if (length(unique(df$length)) > 1) {
+        abline(lm(df$mean_dnds~df$length))
+        length_p <- shapiro.test(df$length)$p.value
+        dnds_p <- shapiro.test(df$mean_dnds)$p.value
+        if (length_p >= 0.05 && dnds_p >= 0.05) {correl <- cor.test(df$length,df$mean_dnds)} else {correl <- cor.test(df$length,df$mean_dnds,method = "spearman",exact=FALSE)}
+        writeLines(capture.output(print(correl)), con=file(sprintf("/home/centos/project/outputs/correlation_%s_cluster%s.txt",val,cluster)))
+      }
+    }
+  }
+  mtext(sprintf("Graphs to show relationship between\n gene length and mean dnds",cluster),side=3,outer=TRUE,padj=3, line=4, font=4)
+  dev.off()
+}  
+# correlation test between gene length and mean dnds and plot with regression line
 
 png('/home/centos/project/outputs/boxplot.png')
 par(mfrow = c(2,2), oma = c(0,0,2,0))
@@ -134,3 +158,7 @@ for (val in unique(reference$clusters)) {
   try(total_space(val), silent=T)
 }
 # total_space function is called for each cluster 
+for (val in unique(reference$clusters)) {
+  try(correlation(val), silent=T)
+}
+
